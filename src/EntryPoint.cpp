@@ -2,9 +2,9 @@
 #include "Color.h"
 
 int main() {
-    Image<640, 480> img;
-    std::cout << (int)img[4][4].r << std::endl;
-    std::cout << (int)img[639][479].r << std::endl;
+    Image<4, 4> img(Color::magenta);
+    img[2][2] = Color::black;
+    img.savePPM("output/example.ppm");
 
     return 0;
 }

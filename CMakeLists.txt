@@ -11,5 +11,6 @@ LINK_DIRECTORIES(${CMAKE_SOURCE_DIR} lib)
 set(CMAKE_DEBUG_POSTFIX "_d")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
+include_directories(include)
 add_subdirectory(src)
 

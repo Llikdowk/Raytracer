@@ -6,13 +6,18 @@
 #include <fstream>
 #include <string>
 
-template <int width, int height>
+template <int w, int h>
 class Image {
     class Proxy;
 
 public:
     using iterator = ColorRGB*;
     using const_iterator = const ColorRGB*;
+
+    enum { width = w, height = h };
+    const float widthf = static_cast<float>(width);
+    const float heightf = static_cast<float>(height);
+    const float aspect_ratio = widthf/heightf;
 
     Image() {
         Image(Color::white);
@@ -33,7 +38,6 @@ public:
         std::ofstream file;
         file.open(path);
 
-        //myfile << "Writing this to a file.\n";
         file << "P3\n";
         file << "#" << path << "\n";
         file << width << " " << height << "\n";

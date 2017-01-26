@@ -8,7 +8,7 @@
 
 template <int w, int h>
 class Image {
-    class Proxy;
+    class ColumnAccessor;
 
 public:
     using iterator = ColorRGB*;
@@ -29,9 +29,9 @@ public:
         }
     }
 
-    Proxy operator[](int x) {
+    ColumnAccessor operator[](int x) {
         assert(x >= 0 && x < width);
-        return Proxy(img[x]);
+        return ColumnAccessor(img[x]);
     }
 
     void savePPM(const char* path) {
@@ -48,7 +48,7 @@ public:
             for (int i = 0; i < width; ++i) {
                 file << static_cast<int>(img[i][j].r) << " "
                      << static_cast<int>(img[i][j].g) << " "
-                     << static_cast<int>(img[i][j].b) << " \t";
+                     << static_cast<int>(img[i][j].b) << " ";
             }
             file << " \n";
         }
@@ -65,10 +65,10 @@ private:
     using data_t = std::array<std::array<ColorRGB, height>, width>;
     data_t img;
 
-    class Proxy {
+    class ColumnAccessor {
     public:
         ColorRGB& operator[](int y) { assert(y >= 0 && y < height); return column[y];}
-        Proxy(std::array<ColorRGB, height>& column) : column(column) {}
+        ColumnAccessor(std::array<ColorRGB, height>& column) : column(column) {}
     private:
         std::array<ColorRGB, height>& column;
     };

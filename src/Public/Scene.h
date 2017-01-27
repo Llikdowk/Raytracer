@@ -26,4 +26,6 @@ public:
 
 private:
     data_t objects;
+    //Camera camera;
+    //data_t lights;
 };

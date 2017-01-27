@@ -6,7 +6,7 @@
 #ifndef _GMTL_MATH_H_
 #define _GMTL_MATH_H_
 
-#include <math.h>
+#include <MyMath.h>
 #include <stdlib.h>
 #include "Defines.h"
 #include "Util/Assert.h"

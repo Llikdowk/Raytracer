@@ -1,4 +1,5 @@
 project(src)
 
-set(SOURCE_FILES EntryPoint.cpp Image.h Color.h)
+include_directories(Public)
+set(SOURCE_FILES EntryPoint.cpp Public/MyMath.h Public/Object.h)
 add_executable(Raytracer ${SOURCE_FILES})

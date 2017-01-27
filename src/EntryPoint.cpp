@@ -1,24 +1,25 @@
 #include "Public/Image.h"
 #include "MyMath.h"
-#include "Object.h"
+#include "Scene.h"
 #include <gmtl/gmtl.h>
 #include <iomanip>
 
 using gmtl::Vec3f;
 using gmtl::Rayf;
 using gmtl::Point3f;
+using gmtl::Matrix44f;
 
+Scene scene;
 
-std::vector<Sphere> objects {Sphere(0, 0, -2, 1), Sphere(0, 1, -2, 0.5f)};
-
-QuadraticSolution intersects(const Rayf& ray, const ::Sphere obj) {
+QuadraticSolution intersects(const Rayf& ray, const Sphere& obj) {
     Vec3f p = ray.getOrigin() - Vec3f(obj.x, obj.y, obj.z);
     return quadratic_solver(1, 2 * dot(p, ray.getDir()), dot(p, p) - obj.r * obj.r);
 }
 
 void cast_ray(const Rayf& ray, ColorRGB& pixel) {
-    for (auto obj = objects.begin(); obj != objects.end(); ++obj) {
-        QuadraticSolution result = intersects(ray, *obj);
+    for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
+        const Object* obj = it->get(); // TODO you shouldn't have to know about scene implementation!
+        QuadraticSolution result = intersects(ray, *dynamic_cast<const Sphere*>(obj));
         if (result.numSolutionsFound > 0) {
             pixel = (*obj).material.color;
         }
@@ -42,8 +43,8 @@ void raytracer() {
             Vec3f dir = camera_raster - origin;
             gmtl::normalize(dir);
             Rayf ray(origin, dir);
-            //Matrix44f camera_to_world; // IDENTITY by default
-            //ray = camera_to_world * ray;
+            Matrix44f camera_to_world; // IDENTITY by default
+            ray = camera_to_world * ray;
             cast_ray(ray, img[i][j]);
         }
         std::cout << "\r" << ( i / static_cast<float>(img.width) * 100) << "%                         ";
@@ -55,6 +56,8 @@ void raytracer() {
 }
 
 int main() {
+    scene.addObject(new Sphere(0, 0, -2, 1))
+         .addObject(new Sphere(0, 1, -2, 0.5f));
     raytracer();
     return 0;
 }

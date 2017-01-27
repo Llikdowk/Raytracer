@@ -1,22 +1,8 @@
 #pragma once
 #include <cstdint>
 
-/*
 struct ColorRGB {
     uint8_t r, g, b;
-    operator ColorRGB() {
-        return ColorRGB{r, g, b, 255};
-    }
-};
- */
-
-struct ColorRGB {
-    uint8_t r, g, b;
-    /*
-    operator ColorRGB() {
-        return ColorRGB{r, g, b};
-    };
-     */
 };
 
 namespace Color {

@@ -6,10 +6,10 @@ class Object {
 public:
     float x, y, z;
     Material material;
+    virtual ~Object() = default;
 
 protected:
     Object(float x, float y, float z) : x(x), y(y), z(z) {}
-    virtual ~Object() = default;
 };
 
 
@@ -17,7 +17,7 @@ class Sphere : public Object {
 public:
     float r;
     Sphere(float x, float y, float z, float r) : Object(x, y, z), r(r) {}
-    virtual ~Sphere() = default;
+    //virtual ~Sphere() = default;
 };
 
 class Light : public Object {

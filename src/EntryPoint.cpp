@@ -1,8 +1,9 @@
 #include "Scene.h"
 #include "Raytracer.h"
-
+#include <meml/DummyHeader.h>
 
 int main() {
+    meml::dummyFunction();
     Scene scene;
     scene.addObject(new Sphere(0, 0, -2, 1))
          .addObject(new Sphere(0, 1, -2, 0.5f));

@@ -52,11 +52,11 @@ private:
 
     void cast_ray(const Rayf& ray, ColorRGB& pixel) {
         float nearDistance = 4294967296.0f;
-        for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
-            const Object* obj = it->get(); // TODO you shouldn't have to know about scene implementation!
-            Collision collision = obj->checkCollision(ray);
+        for (auto it = scene.begin(); it != scene.end(); ++it) {
+            const Object& obj = *(*it);
+            Collision collision = obj.checkCollision(ray);
             if (collision.hasCollided && collision.distance < nearDistance) {
-                pixel = (*obj).material.color;
+                pixel = obj.material.color;
                 nearDistance = collision.distance;
             }
         }

@@ -51,6 +51,7 @@ private:
     Image img;
 
     void cast_ray(const Rayf& ray, ColorRGB& pixel) {
+        static Light l(0, 0, 0);
         float nearDistance = 4294967296.0f;
         for (auto it = scene.begin(); it != scene.end(); ++it) {
             const Object& obj = *(*it);

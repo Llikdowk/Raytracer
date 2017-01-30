@@ -1,15 +1,13 @@
 #include "Scene.h"
 #include "Raytracer.h"
-#include <meml/DummyHeader.h>
 
 int main() {
-    meml::dummyFunction();
     Scene scene;
     scene.addObject(new Sphere(0, 0, -2, 1))
-         .addObject(new Sphere(0, 1, -2, 0.5f));
+         .addObject(new Sphere(0, 1, -2, 0.5f, Material(Color::blue, 1.0f)));
 
     //Raytracer<1000, 1000> raytracer(scene, 90);
-    Raytracer<1000, 1000>* raytracer = new Raytracer<1000, 1000>(scene, 90);
-    raytracer->run();
+    Raytracer raytracer(scene, 1366, 768, 90);
+    raytracer.run();
     return 0;
 }

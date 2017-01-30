@@ -1,12 +1,11 @@
 #pragma once
 #include "Color.h"
-#include <array>
+#include <vector>
 #include <cassert>
 #include <iostream>
 #include <fstream>
 #include <string>
 
-template <int w, int h>
 class Image {
     class ColumnAccessor;
 
@@ -14,18 +13,21 @@ public:
     using iterator = ColorRGB*;
     using const_iterator = const ColorRGB*;
 
-    enum { width = w, height = h };
+    const int width;
+    const int height;
     const float widthf = static_cast<float>(width);
     const float heightf = static_cast<float>(height);
     const float aspect_ratio = widthf/heightf;
 
-    Image() {
-        Image(Color::white);
-    }
+    Image(int width, int height, ColorRGB bgColor)
+        : width(width), height(height), bgColor(bgColor) {
 
-    Image(ColorRGB c) {
-        for(int i = 0; i < width; ++i){
-            img[i].fill(c);
+        img.resize(width);
+        for (int i = 0; i < width; ++i) {
+            img[i].reserve(height);
+            for (int j = 0; j < height; ++j) {
+                img[i].push_back(bgColor);
+            }
         }
     }
 
@@ -56,20 +58,20 @@ public:
         file.close();
     }
 
-    //iterator begin() { return img[0][0]; }
-    //iterator end() { return img[width][height]; }
-    const_iterator begin() const { return img[0][0]; }
-    const_iterator end() const { return img[width][height]; }
+    ColorRGB getBackgroundColor() {
+        return bgColor;
+    }
 
 private:
-    using data_t = std::array<std::array<ColorRGB, height>, width>;
+    using data_t = std::vector<std::vector<ColorRGB> >;
     data_t img;
+    ColorRGB bgColor;
 
     class ColumnAccessor {
     public:
-        ColorRGB& operator[](int y) { assert(y >= 0 && y < height); return column[y];}
-        ColumnAccessor(std::array<ColorRGB, height>& column) : column(column) {}
+        ColorRGB& operator[](int y) { assert(y >= 0 && y < column.size()); return column[y];}
+        ColumnAccessor(std::vector<ColorRGB>& column) : column(column) {}
     private:
-        std::array<ColorRGB, height>& column;
+        std::vector<ColorRGB>& column;
     };
 };

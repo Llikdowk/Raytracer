@@ -10,11 +10,11 @@ using gmtl::Rayf;
 using gmtl::Point3f;
 using gmtl::Matrix44f;
 
-template<int width, int height>
 class Raytracer {
 public:
-    Raytracer(const Scene& s, float fov_angle)
-            : scene(s), fov(deg2rad(fov_angle)), img(Image<width, height>(Color::white))
+
+    Raytracer(const Scene& scene, int width, int height, float fov_angle)
+            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, Color::white)
     {}
 
     void run() {
@@ -22,8 +22,8 @@ public:
         std::cout << std::fixed;
         std::cout << std::setprecision(1);
 
-        for (int i = 0; i < width; ++i) {
-            for (int j = 0; j < height; ++j) {
+        for (int i = 0; i < img.width; ++i) {
+            for (int j = 0; j < img.height; ++j) {
                 Point3f camera_raster {
                         (2*i/img.widthf - 1) * img.aspect_ratio,
                         (-2*j/img.heightf +  1) * tanf(fov/2.0f),
@@ -46,9 +46,9 @@ public:
     }
 
 private:
-    Image<width, height> img;
+    float fov; // rad
     const Scene& scene;
-    float fov;
+    Image img;
 
 
     QuadraticSolution intersects(const Rayf& ray, const Sphere& obj) {

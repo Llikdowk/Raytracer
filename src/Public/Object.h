@@ -17,6 +17,7 @@ class Sphere : public Object {
 public:
     float r;
     Sphere(float x, float y, float z, float r) : Object(x, y, z), r(r) {}
+    Sphere(float x, float y, float z, float r, Material mat) : Sphere(x, y, z, r) { material = mat; }
     //virtual ~Sphere() = default;
 };
 

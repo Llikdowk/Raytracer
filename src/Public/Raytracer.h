@@ -2,9 +2,9 @@
 #include "Image.h"
 #include "Scene.h"
 #include "MyMath.h"
-#include <gmtl/gmtl.h>
 #include <iomanip>
 
+#include <gmtl/gmtl.h>
 using gmtl::Vec3f;
 using gmtl::Rayf;
 using gmtl::Point3f;
@@ -50,18 +50,14 @@ private:
     const Scene& scene;
     Image img;
 
-
-    QuadraticSolution intersects(const Rayf& ray, const Sphere& obj) {
-        Vec3f p = ray.getOrigin() - Vec3f(obj.x, obj.y, obj.z);
-        return quadratic_solver(1, 2 * dot(p, ray.getDir()), dot(p, p) - obj.r * obj.r);
-    }
-
     void cast_ray(const Rayf& ray, ColorRGB& pixel) {
+        float nearDistance = 4294967296.0f;
         for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
             const Object* obj = it->get(); // TODO you shouldn't have to know about scene implementation!
-            QuadraticSolution result = intersects(ray, *dynamic_cast<const Sphere*>(obj)); // TODO check different types!
-            if (result.numSolutionsFound > 0) {
+            Collision collision = obj->checkCollision(ray);
+            if (collision.hasCollided && collision.distance < nearDistance) {
                 pixel = (*obj).material.color;
+                nearDistance = collision.distance;
             }
         }
     }

@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <utility>
 
 struct QuadraticSolution {
     int numSolutionsFound;

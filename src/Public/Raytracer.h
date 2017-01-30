@@ -51,14 +51,21 @@ private:
     Image img;
 
     void cast_ray(const Rayf& ray, ColorRGB& pixel) {
-        static Light l(0, 0, 0);
+        static Light light(2, 1, 0); // TODO set up lights in scene
+
         float nearDistance = 4294967296.0f;
         for (auto it = scene.begin(); it != scene.end(); ++it) {
             const Object& obj = *(*it);
             Collision collision = obj.checkCollision(ray);
             if (collision.hasCollided && collision.distance < nearDistance) {
-                pixel = obj.material.color;
                 nearDistance = collision.distance;
+
+                Vec3f normal = obj.getNormal(collision.hitPoint);
+                Vec3f lDir = light.centre - collision.hitPoint;
+                gmtl::normalize(lDir);
+
+                float shading = gmtl::dot(normal, lDir); // TODO manage dark face case
+                pixel = obj.material.color * shading;
             }
         }
     }

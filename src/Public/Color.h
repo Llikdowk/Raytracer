@@ -1,11 +1,21 @@
 #pragma once
 #include <cstdint>
+#include <algorithm>
+
+int8_t clamp(uint8_t target) { // encapsulate in CPP
+    return std::min(std::max(target, static_cast<uint8_t>(0)), static_cast<uint8_t>(255));
+}
 
 struct ColorRGB {
     ColorRGB(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b) {}
-    ColorRGB(const ColorRGB& c) : r(c.r), g(c.g), b(c.b) {}
+    ColorRGB(const ColorRGB& c) : r(c.r), g(c.g), b(c.b) {} // TODO check what happens without casting
 
     uint8_t r, g, b;
+
+    ColorRGB operator*(float k) const {
+        return ColorRGB(clamp(k*r), clamp(k*g), clamp(k*b));
+    }
+
 };
 
 struct ColorRGBA : public ColorRGB {
@@ -15,6 +25,9 @@ struct ColorRGBA : public ColorRGB {
 
     uint8_t a;
 
+    ColorRGBA operator*(float k) const {
+        return ColorRGBA(clamp(k*r), clamp(k*g), clamp(k*b), a);
+    }
 };
 
 

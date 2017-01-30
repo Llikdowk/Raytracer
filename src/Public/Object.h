@@ -19,6 +19,7 @@ public:
     Material material;
     virtual ~Object() = default;
     virtual Collision checkCollision(const Rayf& r) const = 0;
+    virtual Vec3f getNormal(const Vec3f& point) const { return Vec3f(0,0,0); };
 
 
 protected:
@@ -46,12 +47,17 @@ public:
 
         return {false, Vec3f(0,0,0), 0};
     }
+
+    virtual Vec3f getNormal(const Vec3f& point) const override {
+        Vec3f dif = point - centre;
+        gmtl::normalize(dif);
+        return dif;
+    }
 };
 
 class Light : public Object {
 public:
     Light(float x, float y, float z) : Object(x, y, z) {}
-    Light(float x, float y, float z, Color c) : Light(x, y, z), color(c) {}
     Light& setColor(ColorRGBA color) {
         this->color = color;
         return *this;
@@ -63,6 +69,10 @@ public:
     Light& setIntensity(float f) {
         f = std::min(std::max(f, 0.0f), 1.0f);
         color.a = static_cast<uint8_t>(f*255);
+    }
+
+    virtual Collision checkCollision(const Rayf& ray) const override {
+        return {false, Vec3f(0,0,0), 0.0f};
     }
 
     ColorRGBA color = Color::white;

@@ -62,9 +62,10 @@ private:
                 for (auto light_it = scene.getLights().begin(); light_it != scene.getLights().end(); ++light_it) {
                     const Light& light = *(*light_it);
                     Vec3f lDir = light.centre - collision.hitPoint;
+                    float lDistance = gmtl::length(lDir);
                     gmtl::normalize(lDir);
-                    float shading = std::min(std::max(gmtl::dot(normal, lDir), 0.0f), 1.0f);
-                    pixel = shading * obj.material.color;
+                    float shading = std::max(gmtl::dot(normal, lDir), 0.0f) * 1.0f/lDistance;
+                    pixel += shading * obj.material.color;
                 }
             }
         }

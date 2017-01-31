@@ -2,6 +2,7 @@
 #include "Image.h"
 #include "Scene.h"
 #include "MyMath.h"
+#include "Color.h"
 #include <iomanip>
 
 #include <gmtl/gmtl.h>
@@ -14,7 +15,7 @@ class Raytracer {
 public:
 
     Raytracer(const Scene& scene, int width, int height, float fov_angle)
-            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, Color::black)
+            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, ColorRGBA::black)
     {}
 
     void run() {
@@ -48,23 +49,22 @@ public:
 private:
     float fov; // rad
     const Scene& scene;
-    Image img;
+    Image<ColorRGBA> img;
 
-    void cast_ray(const Rayf& ray, ColorRGB& pixel) {
-        float nearDistance = 4294967296.0f;
+    void cast_ray(const Rayf& ray, ColorRGBA& pixel) {
+        float nearDistance = 10e9f;
         for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
             const Object& obj = *(*it);
             Collision collision = obj.checkCollision(ray);
             if (collision.hasCollided && collision.distance < nearDistance) {
                 nearDistance = collision.distance;
                 Vec3f normal = obj.getNormal(collision.hitPoint);
-                pixel = Color::black;
                 for (auto light_it = scene.getLights().begin(); light_it != scene.getLights().end(); ++light_it) {
                     const Light& light = *(*light_it);
                     Vec3f lDir = light.centre - collision.hitPoint;
                     gmtl::normalize(lDir);
                     float shading = std::min(std::max(gmtl::dot(normal, lDir), 0.0f), 1.0f);
-                    pixel = pixel + obj.material.color * shading;
+                    pixel = shading * obj.material.color;
                 }
             }
         }

@@ -21,7 +21,6 @@ public:
     virtual Collision checkCollision(const Rayf& r) const = 0;
     virtual Vec3f getNormal(const Vec3f& point) const { return Vec3f(0,0,0); };
 
-
 protected:
     Object(float x, float y, float z) : centre(x, y, z) {}
 };
@@ -32,7 +31,6 @@ public:
     float r;
     Sphere(float x, float y, float z, float r) : Object(x, y, z), r(r) {}
     Sphere(float x, float y, float z, float r, Material mat) : Sphere(x, y, z, r) { material = mat; }
-    virtual ~Sphere() = default;
 
     virtual Collision checkCollision(const Rayf& ray) const override {
         Vec3f p = ray.getOrigin() - centre;
@@ -40,7 +38,7 @@ public:
         if (result.numSolutionsFound > 0) {
             float r = result.x1 > 0 ? result.x1 : result.x2;
             if (r > 0) {
-                Vec3f hitPoint = ray.getOrigin() + r * ray.getDir();
+                Vec3f hitPoint = ray.getOrigin() + static_cast<Vec3f>(r * ray.getDir());
                 return {true, hitPoint, r};
             }
         }
@@ -62,18 +60,14 @@ public:
         this->color = color;
         return *this;
     }
-    Light& setColor(ColorRGB color) {
-        this->color = ColorRGBA(color, 255);
-        return *this;
-    }
+
     Light& setIntensity(float f) {
-        f = std::min(std::max(f, 0.0f), 1.0f);
-        color.a = static_cast<uint8_t>(f*255);
+        color.setAlpha(f);
     }
 
     virtual Collision checkCollision(const Rayf& ray) const override {
         return {false, Vec3f(0,0,0), 0.0f};
     }
 
-    ColorRGBA color = Color::white;
+    ColorRGBA color = ColorRGBA::white;
 };

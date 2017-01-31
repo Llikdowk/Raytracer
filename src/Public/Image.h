@@ -6,12 +6,13 @@
 #include <fstream>
 #include <string>
 
+template <class ColorEncoding>
 class Image {
     class ColumnAccessor;
 
 public:
-    using iterator = ColorRGB*;
-    using const_iterator = const ColorRGB*;
+    using iterator = ColorEncoding*;
+    using const_iterator = const ColorEncoding*;
 
     const int width;
     const int height;
@@ -19,7 +20,7 @@ public:
     const float heightf = static_cast<float>(height);
     const float aspect_ratio = widthf/heightf;
 
-    Image(int width, int height, ColorRGB bgColor)
+    Image(int width, int height, ColorEncoding bgColor)
         : width(width), height(height), bgColor(bgColor) {
 
         img.resize(width);
@@ -43,14 +44,14 @@ public:
         file << "P3\n";
         file << "#" << path << "\n";
         file << width << " " << height << "\n";
-        file << "255" << "\n";
+        file << ColorEncoding::TOP_VALUE << "\n"; // TODO: use img internal color
 
         for (int j = 0; j < height; ++j) {
             file << " ";
             for (int i = 0; i < width; ++i) {
-                file << static_cast<int>(img[i][j].r) << " "
-                     << static_cast<int>(img[i][j].g) << " "
-                     << static_cast<int>(img[i][j].b) << " ";
+                file << static_cast<unsigned int>(img[i][j].getR()) << " "
+                     << static_cast<unsigned int>(img[i][j].getG()) << " "
+                     << static_cast<unsigned int>(img[i][j].getB()) << " ";
             }
             file << " \n";
         }
@@ -58,20 +59,20 @@ public:
         file.close();
     }
 
-    ColorRGB getBackgroundColor() {
+    ColorEncoding getBackgroundColor() {
         return bgColor;
     }
 
 private:
-    using data_t = std::vector<std::vector<ColorRGB> >;
+    using data_t = std::vector<std::vector<ColorEncoding> >;
     data_t img;
-    ColorRGB bgColor;
+    ColorEncoding bgColor;
 
     class ColumnAccessor {
     public:
-        ColorRGB& operator[](int y) { assert(y >= 0 && y < column.size()); return column[y];}
-        ColumnAccessor(std::vector<ColorRGB>& column) : column(column) {}
+        ColorEncoding& operator[](int y) { assert(y >= 0 && y < column.size()); return column[y];}
+        ColumnAccessor(std::vector<ColorEncoding>& column) : column(column) {}
     private:
-        std::vector<ColorRGB>& column;
+        std::vector<ColorEncoding>& column;
     };
 };

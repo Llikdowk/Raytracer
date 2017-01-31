@@ -4,6 +4,6 @@
 struct Material {
     Material() = default;
     Material(const ColorRGBA& color) : color(color) {}
-    ColorRGBA color = Color::magenta;
+    ColorRGBA color = ColorRGBA::magenta;
 };
 

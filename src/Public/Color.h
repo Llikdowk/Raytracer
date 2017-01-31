@@ -10,7 +10,7 @@ public:
     using value_type = T;
     enum { TOP_VALUE = MAX_VALUE };
 
-    Color(float r, float g, float b, float a = 1)
+    Color(float r, float g, float b, float a = 1.0f)
         : r(r*MAX_VALUE), g(g*MAX_VALUE), b(b*MAX_VALUE), a(a*MAX_VALUE) {
         clamp();
     };

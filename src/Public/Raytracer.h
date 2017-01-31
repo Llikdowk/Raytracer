@@ -59,6 +59,7 @@ private:
             if (collision.hasCollided && collision.distance < nearDistance) {
                 nearDistance = collision.distance;
                 Vec3f normal = obj.getNormal(collision.hitPoint);
+                pixel = ColorRGBA::black;
                 for (auto light_it = scene.getLights().begin(); light_it != scene.getLights().end(); ++light_it) {
                     const Light& light = *(*light_it);
                     Vec3f lDir = light.centre - collision.hitPoint;

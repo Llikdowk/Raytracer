@@ -78,7 +78,7 @@ public:
     static const Color<T, MAX_VALUE> blue;
     static const Color<T, MAX_VALUE> yellow;
     static const Color<T, MAX_VALUE> magenta;
-    static const Color<T, MAX_VALUE> purple;
+    static const Color<T, MAX_VALUE> cyan;
     static const Color<T, MAX_VALUE> white;
     static const Color<T, MAX_VALUE> black;
 
@@ -94,7 +94,7 @@ template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>
 template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::blue = Color<T, MAX_VALUE>   (0, 0, 1);
 template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::yellow = Color<T, MAX_VALUE> (1, 1, 0);
 template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::magenta = Color<T, MAX_VALUE>(1, 0, 1);
-template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::purple = Color<T, MAX_VALUE> (0, 1, 1);
+template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::cyan = Color<T, MAX_VALUE> (0, 1, 1);
 template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::white = Color<T, MAX_VALUE>  (1, 1, 1);
 template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::black = Color<T, MAX_VALUE>  (0, 0, 0);
 

@@ -20,7 +20,9 @@ TEST (ColorTest, kMul) {
     bhalf = 0.5*b;
     EXPECT_EQ(bb, b);
     EXPECT_EQ(bhalf, ColorRGBA(0.5, 0.5, 0.5));
-}
+    
+    EXPECT_EQ(ColorRGBA::white * 1.0f, ColorRGBA::white);
+} 
 
 TEST (ColorTest, ColorMul) {
     ColorRGBA black = ColorRGBA::black;

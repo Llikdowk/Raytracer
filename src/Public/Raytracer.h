@@ -66,7 +66,7 @@ private:
                     float lDistance = gmtl::length(lDir);
                     gmtl::normalize(lDir);
                     float shading = std::max(gmtl::dot(normal, lDir), 0.0f) * 1.0f/lDistance;
-                    pixel += shading * obj.material.color;
+                    pixel = pixel + shading * (obj.material.color * light.color);
                 }
             }
         }

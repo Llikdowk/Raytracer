@@ -31,3 +31,14 @@ float deg2rad(float deg) {
 float rad2deg(float rad) {
     return 360.0f / (2 * static_cast<float>(M_PI)) * rad;
 }
+
+template <typename T>
+T clamp(T value, T min, T max) {
+    return value < min ? min : (value > max ? max : value);
+}
+
+template <typename T>
+T lerp(float t, T a, T b) {
+    t = clamp(t, 0.0f, 1.0f);
+    return a*(1 - t) + b*t;
+}

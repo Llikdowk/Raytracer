@@ -1,7 +1,7 @@
 #pragma once
 
+#include "MyMath.h"
 #include <cstdint>
-#include <algorithm>
 
 template <typename T, T MAX_VALUE>
 class Color {
@@ -11,29 +11,54 @@ public:
     enum { TOP_VALUE = MAX_VALUE };
 
     Color(float r, float g, float b, float a = 1.0f)
-        : r(r*MAX_VALUE), g(g*MAX_VALUE), b(b*MAX_VALUE), a(a*MAX_VALUE) {
-        clamp();
+        : r(clamp(r, 0.0f, 1.0f)*MAX_VALUE), g(clamp(g, 0.0f, 1.0f)*MAX_VALUE),
+          b(clamp(b, 0.0f, 1.0f)*MAX_VALUE), a(clamp(a, 0.0f, 1.0f)*MAX_VALUE) {
     };
 
     void setAlpha(float a) {
-//        this->a = std::min(std::max(a*MAX_VALUE, 0), MAX_VALUE);
-        this->a = a; // TODO unsafe
+        this->a = MAX_VALUE*clamp(a, 0.0f, 1.0f);
     }
 
     Color operator*(float k) const {
-        return Color(r/MAX_VALUE*k, g/MAX_VALUE*k, b/MAX_VALUE*k, a);//.clamp();
+        return Color(r/MAX_VALUE*k, g/MAX_VALUE*k, b/MAX_VALUE*k, a);
     }
-    template<typename, size_t> friend Color<T, MAX_VALUE> operator*(float, const Color<T, MAX_VALUE>&);
+    template<typename, T> friend Color<T, MAX_VALUE> operator*(float, const Color<T, MAX_VALUE>&);
 
+
+
+    Color operator*(const Color& c) const {
+        return Color(r/static_cast<float>(MAX_VALUE) * c.r/static_cast<float>(MAX_VALUE),
+                     g/static_cast<float>(MAX_VALUE) * c.g/static_cast<float>(MAX_VALUE),
+                     b/static_cast<float>(MAX_VALUE) * c.b/static_cast<float>(MAX_VALUE),
+                     a/static_cast<float>(MAX_VALUE) * c.a/static_cast<float>(MAX_VALUE));
+    }
 
     Color operator+(const Color& c) const {
-        return Color(r+c.r, g+c.g, b+c.b, a);//.clamp();
+        return Color(r/static_cast<float>(MAX_VALUE) + c.r/static_cast<float>(MAX_VALUE),
+                     g/static_cast<float>(MAX_VALUE) + c.g/static_cast<float>(MAX_VALUE),
+                     b/static_cast<float>(MAX_VALUE) + c.b/static_cast<float>(MAX_VALUE),
+                     a/static_cast<float>(MAX_VALUE) + c.a/static_cast<float>(MAX_VALUE));
     }
+
     Color operator+=(const Color& c) {
-        r += c.r;
-        g += c.g;
-        b += c.b;
-        clamp();
+        r = MAX_VALUE * (r / static_cast<float>(MAX_VALUE) + c.r/static_cast<float>(MAX_VALUE));
+        g = MAX_VALUE * (g / static_cast<float>(MAX_VALUE) + c.g/static_cast<float>(MAX_VALUE));
+        b = MAX_VALUE * (b / static_cast<float>(MAX_VALUE) + c.b/static_cast<float>(MAX_VALUE));
+        a = MAX_VALUE * (a / static_cast<float>(MAX_VALUE) + c.a/static_cast<float>(MAX_VALUE));
+    }
+
+    Color operator-(const Color& c) const {
+        return Color(r/ static_cast<float>(MAX_VALUE) - c.r/static_cast<float>(MAX_VALUE),
+                     g/ static_cast<float>(MAX_VALUE) - c.g/static_cast<float>(MAX_VALUE),
+                     b/ static_cast<float>(MAX_VALUE) - c.b/static_cast<float>(MAX_VALUE),
+                     a/ static_cast<float>(MAX_VALUE) - c.a/static_cast<float>(MAX_VALUE));
+    }
+
+    Color operator-=(const Color& c) {
+        r = MAX_VALUE * (r / static_cast<float>(MAX_VALUE) - c.r/static_cast<float>(MAX_VALUE));
+        g = MAX_VALUE * (g / static_cast<float>(MAX_VALUE) - c.g/static_cast<float>(MAX_VALUE));
+        b = MAX_VALUE * (b / static_cast<float>(MAX_VALUE) - c.b/static_cast<float>(MAX_VALUE));
+        a = MAX_VALUE * (a / static_cast<float>(MAX_VALUE) - c.a/static_cast<float>(MAX_VALUE));
     }
 
     bool operator==(const Color& c) const {
@@ -59,14 +84,6 @@ public:
 
 private:
     T r, g, b, a;
-
-    Color& clamp() {
-        r = std::min(std::max(r, static_cast<T>(0)), MAX_VALUE);
-        g = std::min(std::max(g, static_cast<T>(0)), MAX_VALUE);
-        b = std::min(std::max(b, static_cast<T>(0)), MAX_VALUE);
-        a = std::min(std::max(a, static_cast<T>(0)), MAX_VALUE);
-        return *this;
-    }
 };
 
 template <typename T, T MAX_VALUE>
@@ -81,5 +98,4 @@ template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>
 template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::white = Color<T, MAX_VALUE>  (1, 1, 1);
 template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::black = Color<T, MAX_VALUE>  (0, 0, 0);
 
-using ColorRGBA = Color<uint16_t, 0xFF>;
-
+using ColorRGBA = Color<uint8_t, 0xFF>;

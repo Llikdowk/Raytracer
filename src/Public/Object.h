@@ -56,6 +56,7 @@ public:
 class Light : public Object {
 public:
     Light(float x, float y, float z) : Object(x, y, z) {}
+    Light(float x, float y, float z, ColorRGBA c) : Object(x, y, z), color(c) {}
     Light& setColor(ColorRGBA color) {
         this->color = color;
         return *this;
@@ -63,6 +64,7 @@ public:
 
     Light& setIntensity(float f) {
         color.setAlpha(f);
+        return *this;
     }
 
     virtual Collision checkCollision(const Rayf& ray) const override {

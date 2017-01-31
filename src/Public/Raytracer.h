@@ -14,7 +14,7 @@ class Raytracer {
 public:
 
     Raytracer(const Scene& scene, int width, int height, float fov_angle)
-            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, Color::white)
+            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, Color::black)
     {}
 
     void run() {
@@ -51,21 +51,21 @@ private:
     Image img;
 
     void cast_ray(const Rayf& ray, ColorRGB& pixel) {
-        static Light light(2, 1, 0); // TODO set up lights in scene
-
         float nearDistance = 4294967296.0f;
-        for (auto it = scene.begin(); it != scene.end(); ++it) {
+        for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
             const Object& obj = *(*it);
             Collision collision = obj.checkCollision(ray);
             if (collision.hasCollided && collision.distance < nearDistance) {
                 nearDistance = collision.distance;
-
                 Vec3f normal = obj.getNormal(collision.hitPoint);
-                Vec3f lDir = light.centre - collision.hitPoint;
-                gmtl::normalize(lDir);
-
-                float shading = gmtl::dot(normal, lDir); // TODO manage dark face case
-                pixel = obj.material.color * shading;
+                pixel = Color::black;
+                for (auto light_it = scene.getLights().begin(); light_it != scene.getLights().end(); ++light_it) {
+                    const Light& light = *(*light_it);
+                    Vec3f lDir = light.centre - collision.hitPoint;
+                    gmtl::normalize(lDir);
+                    float shading = std::min(std::max(gmtl::dot(normal, lDir), 0.0f), 1.0f);
+                    pixel = pixel + obj.material.color * shading;
+                }
             }
         }
     }

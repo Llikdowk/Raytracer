@@ -5,23 +5,24 @@
 
 class Scene {
 public:
-    using ptr_t = std::unique_ptr<Object>;
-    using data_t = std::vector<ptr_t>;
-    using iterator = data_t::iterator;
-    using const_iterator = data_t::const_iterator;
+    using VectorObj = std::vector<std::unique_ptr<Object>>;
+    using VectorLight = std::vector<std::unique_ptr<Light>>;
 
     Scene& addObject(Object* obj) {
-        objects.push_back(ptr_t(obj));
+        objects.push_back(VectorObj::value_type(obj));
         return *this;
     }
 
-    iterator begin() { return objects.begin(); }
-    iterator end() { return objects.end(); }
-    const_iterator begin() const { return objects.begin(); }
-    const_iterator end() const { return objects.end(); }
+    Scene& addLight(Light* obj) {
+        lights.push_back(VectorLight::value_type(obj));
+        return *this;
+    }
+
+    const VectorObj& getObjects() const { return objects; }
+    const VectorLight& getLights() const { return lights; }
 
 private:
-    data_t objects;
+    VectorObj objects;
+    VectorLight lights;
     //Camera camera;
-    //data_t lights;
 };

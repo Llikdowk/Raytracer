@@ -20,7 +20,11 @@ public:
     }
 
     Color operator*(float k) const {
-        return Color(r/MAX_VALUE*k, g/MAX_VALUE*k, b/MAX_VALUE*k, a);
+        return Color(
+                r/static_cast<float>(MAX_VALUE)*k,
+                g/static_cast<float>(MAX_VALUE)*k,
+                b/static_cast<float>(MAX_VALUE)*k,
+                a);
     }
     template<typename, T> friend Color<T, MAX_VALUE> operator*(float, const Color<T, MAX_VALUE>&);
 

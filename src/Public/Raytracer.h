@@ -54,8 +54,8 @@ private:
 
     ColorRGBA cast_ray(const Rayf& ray, int depth = 0) {
         static const int MAX_DEPTH = 7;
-        static const float GLOSSINESS = 75.0f;
-        static const float FRESNEL = 10.0f;
+        //static const float GLOSSINESS = 75.0f;
+        //static const float FRESNEL = 10.0f;
         if (depth > MAX_DEPTH) {
             return ColorRGBA::black; //img.getBackgroundColor();
         }
@@ -83,13 +83,14 @@ private:
                 float lDistance = gmtl::length(lDir);
                 gmtl::normalize(lDir);
                 gmtl::reflect(reflection, ray.getDir(), normal);
-                float diffuse = 1.0f * std::max(gmtl::dot(normal, lDir), 0.0f);
+                const Material& mat = nearObj->material;
+                float diffuse = mat.kDiffuse * std::max(gmtl::dot(normal, lDir), 0.0f);
                 reflection *= -1;
-                float specular = 1.0f * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), GLOSSINESS);
+                float specular = mat.kSpecular * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), mat.specularPower);
                 reflection *= -1;
-                float fresnel = 1.0f * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), FRESNEL);
+                float fresnel = mat.kFresnel * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), mat.fresnelPower);
                 float shading = (diffuse + specular + fresnel)/(lDistance*lDistance);
-                pixel += shading * (nearObj->material.color * light.color);
+                pixel += shading * (mat.color * light.color);
             }
             return pixel + 0.75f * cast_ray(Rayf(nearCollision.hitPoint + static_cast<Vec3f>(normal*0.1f), reflection), depth + 1); // fixme color mult not working properly!
         }

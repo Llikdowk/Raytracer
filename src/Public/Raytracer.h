@@ -35,6 +35,8 @@ public:
                 gmtl::normalize(dir);
                 Rayf ray(origin, dir);
                 Matrix44f camera_to_world; // IDENTITY by default
+                camera_to_world[0][3] = 0.5f;
+                camera_to_world[1][3] = 0.25f;
                 ray = camera_to_world * ray;
                 img[i][j] = cast_ray(ray);
             }
@@ -56,7 +58,18 @@ private:
         Vec3f n = normal;
         Vec3f opp_normal = normal;
         opp_normal *= -1;
-        return Vec3f(incident) + Vec3f(2*gmtl::dot(opp_normal, incident)*normal);
+        float n1 = RefractionCoefficient::empty;
+        float n2 = RefractionCoefficient::glass;
+
+        float c = gmtl::dot(normal, incident);
+        if (c > 0.0f) {// from filed to empty medium
+            std::swap(n1, n2);
+        }
+        c *= -1;
+        float r = n1/n2;
+
+        Vec3f result = Vec3f(r*incident) + Vec3f((r*c - sqrtf(1 - r*r*(1-c*c)))*normal);
+        return result;
     }
 
     ColorRGBA cast_ray(const Rayf& ray, int depth = 0) {
@@ -100,13 +113,8 @@ private:
                 ColorRGBA cFres = fresnel * lightAttenuation * light.color;
                 pixel += cEmission + cDif + cSpec + cFres;
             }
-            Vec3f refraction;
-            if (depth % 2 == 0) {
-                refraction = refract(ray.getDir(), normal, RefractionCoefficient::empty);
-            } else {
-                refraction = refract(ray.getDir(), normal, mat.kRefraction);
-            }
-            return pixel + .75f //* cast_ray(Rayf(nearCollision.hitPoint - static_cast<Vec3f>(normal*0.1f), refraction), depth + 1);
+            Vec3f refraction = refract(ray.getDir(), normal, mat.kRefraction);
+            return pixel + .75f //* 1.25f * cast_ray(Rayf(nearCollision.hitPoint - static_cast<Vec3f>(normal*0.1f), refraction), depth + 1);
                    * ( 0.5f * cast_ray(Rayf(nearCollision.hitPoint + static_cast<Vec3f>(normal*0.1f), reflection), depth + 1)
                      + 1.0f * cast_ray(Rayf(nearCollision.hitPoint - static_cast<Vec3f>(normal*0.1f), refraction), depth + 1)
                      );

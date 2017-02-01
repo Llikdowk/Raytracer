@@ -12,7 +12,7 @@ int main() {
          .addLight(new Light(-2, -2, 0, ColorRGBA::cyan))
     ;
 
-    Raytracer raytracer(scene, 800, 600, 90);
+    Raytracer raytracer(scene, 1600, 1200, 90);
     raytracer.run();
     return 0;
 }

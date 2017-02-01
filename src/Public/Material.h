@@ -11,8 +11,8 @@ struct Material {
     Material() = default;
     Material(const ColorRGBA& color) : color(color) {}
     ColorRGBA color = ColorRGBA::magenta;
-    float kEmission = 0.050f;
-    float kDiffuse = 0.50f;
+    float kEmission = 0.001f;
+    float kDiffuse = 0.750f;
     float kSpecular = 1.0f;
     float specularPower = 250.0f; // glossiness
     float kFresnel = 1.0f;

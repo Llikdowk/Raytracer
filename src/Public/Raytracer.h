@@ -15,7 +15,7 @@ class Raytracer {
 public:
 
     Raytracer(const Scene& scene, int width, int height, float fov_angle)
-            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, ColorRGBA(.2, .2, .2))
+            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, ColorRGBA(.1, .1, .1))
     {}
 
     void run() {
@@ -73,7 +73,7 @@ private:
     }
 
     ColorRGBA cast_ray(const Rayf& ray, int depth = 0) {
-        static const int MAX_DEPTH = 4;
+        static const int MAX_DEPTH = 7;
         if (depth > MAX_DEPTH) {
             return ColorRGBA::black; // global illumination
         }
@@ -113,10 +113,10 @@ private:
                 ColorRGBA cFres = fresnel * lightAttenuation * light.color;
                 pixel += cEmission + cDif + cSpec + cFres;
             }
-            Vec3f refraction = refract(ray.getDir(), normal, mat.kRefraction);
-            return pixel + .75f //* 1.25f * cast_ray(Rayf(nearCollision.hitPoint - static_cast<Vec3f>(normal*0.1f), refraction), depth + 1);
-                   * ( 0.5f * cast_ray(Rayf(nearCollision.hitPoint + static_cast<Vec3f>(normal*0.1f), reflection), depth + 1)
-                     + 1.0f * cast_ray(Rayf(nearCollision.hitPoint - static_cast<Vec3f>(normal*0.1f), refraction), depth + 1)
+            Vec3f refraction = refract(ray.getDir(), normal, mat.coeffRefraction);
+            return pixel + .75f
+                   * ( mat.kReflection * cast_ray(Rayf(nearCollision.hitPoint + static_cast<Vec3f>(normal*0.1f), reflection), depth + 1)
+                     + mat.kRefraction * cast_ray(Rayf(nearCollision.hitPoint - static_cast<Vec3f>(normal*0.1f), refraction), depth + 1)
                      );
         }
 

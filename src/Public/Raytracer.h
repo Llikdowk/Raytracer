@@ -40,6 +40,7 @@ public:
             }
             std::cout << "\r" << ( i / static_cast<float>(img.width) * 100) << "%                         ";
         }
+
         std::cout << "\r" << "100.0%                         ";
         std::cout << "\nImage generated!";
 
@@ -52,7 +53,10 @@ private:
     Image<ColorRGBA> img;
 
     ColorRGBA cast_ray(const Rayf& ray, int depth = 0) {
-        if (depth > 16) {
+        static const int MAX_DEPTH = 7;
+        static const float GLOSSINESS = 75.0f;
+        static const float FRESNEL = 10.0f;
+        if (depth > MAX_DEPTH) {
             return ColorRGBA::black; //img.getBackgroundColor();
         }
 
@@ -72,17 +76,28 @@ private:
         if (nearObj != nullptr) {
             ColorRGBA pixel = ColorRGBA::black;
             Vec3f normal = nearObj->getNormal(nearCollision.hitPoint);
+            Vec3f reflection;
             for (auto light_it = scene.getLights().begin(); light_it != scene.getLights().end(); ++light_it) {
                 const Light &light = *(*light_it);
                 Vec3f lDir = light.centre - nearCollision.hitPoint;
                 float lDistance = gmtl::length(lDir);
                 gmtl::normalize(lDir);
-                float shading = std::max(gmtl::dot(normal, lDir), 0.0f) / (lDistance * lDistance);
+                gmtl::reflect(reflection, ray.getDir(), normal);
+                float diffuse = 1.0f * std::max(gmtl::dot(normal, lDir), 0.0f);
+                reflection *= -1;
+                float specular = 1.0f * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), GLOSSINESS);
+                reflection *= -1;
+                float fresnel = 1.0f * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), FRESNEL);
+                float shading = (diffuse + specular + fresnel)/(lDistance*lDistance);
                 pixel += shading * (nearObj->material.color * light.color);
             }
-            return pixel + cast_ray(Rayf(nearCollision.hitPoint, normal), depth + 1); // fixme color mult not working properly!
+            return pixel + 0.75f * cast_ray(Rayf(nearCollision.hitPoint + static_cast<Vec3f>(normal*0.1f), reflection), depth + 1); // fixme color mult not working properly!
         }
 
-        return img.getBackgroundColor();
+        if (depth == 0) {
+            return img.getBackgroundColor();
+        } else {
+            return ColorRGBA::black;
+        }
     }
 };

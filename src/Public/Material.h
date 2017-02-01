@@ -1,15 +1,22 @@
 #pragma once
 #include "Color.h"
 
+namespace RefractionCoefficient {
+    const float empty = 1.0;
+    const float glass = 1.52;
+    const float water = 1.333;
+};
+
 struct Material {
     Material() = default;
     Material(const ColorRGBA& color) : color(color) {}
     ColorRGBA color = ColorRGBA::magenta;
-    float kDiffuse = 1.0f;
+    float kEmission = 0.050f;
+    float kDiffuse = 0.50f;
     float kSpecular = 1.0f;
-    float specularPower = 75.0f; // glossiness
+    float specularPower = 250.0f; // glossiness
     float kFresnel = 1.0f;
     float fresnelPower = 10.0f;
-
+    float kRefraction = RefractionCoefficient::glass;
 };
 

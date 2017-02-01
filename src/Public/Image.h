@@ -44,7 +44,7 @@ public:
         file << "P3\n";
         file << "#" << path << "\n";
         file << width << " " << height << "\n";
-        file << ColorEncoding::TOP_VALUE << "\n"; // TODO: use img internal color
+        file << ColorEncoding::TOP_VALUE << "\n";
 
         for (int j = 0; j < height; ++j) {
             file << " ";

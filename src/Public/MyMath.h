@@ -11,7 +11,7 @@ QuadraticSolution quadratic_solver(float a, float b, float c) { // a*x2 + b*x + 
     float discriminant = b*b - 4*a*c;
     if (discriminant < 0.0f) {
         return QuadraticSolution{0, NAN, NAN};
-    } else if (discriminant < 0.0001f) { // CAUTION! equals float comparison! check its correctness
+    } else if (discriminant < 0.0001f) {
         float result = -b / (2*a);
         return QuadraticSolution{1, result, result};
     } else {

@@ -54,10 +54,8 @@ private:
 
     ColorRGBA cast_ray(const Rayf& ray, int depth = 0) {
         static const int MAX_DEPTH = 7;
-        //static const float GLOSSINESS = 75.0f;
-        //static const float FRESNEL = 10.0f;
         if (depth > MAX_DEPTH) {
-            return ColorRGBA::black; //img.getBackgroundColor();
+            return ColorRGBA::black;
         }
 
 
@@ -95,10 +93,6 @@ private:
             return pixel + 0.75f * cast_ray(Rayf(nearCollision.hitPoint + static_cast<Vec3f>(normal*0.1f), reflection), depth + 1); // fixme color mult not working properly!
         }
 
-        if (depth == 0) {
-            return img.getBackgroundColor();
-        } else {
-            return ColorRGBA::black;
-        }
+        return  depth == 0 ? img.getBackgroundColor() : ColorRGBA::black;
     }
 };

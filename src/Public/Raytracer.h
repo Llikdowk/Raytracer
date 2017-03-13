@@ -18,7 +18,7 @@ class Raytracer {
 public:
 
     Raytracer(const Scene& scene, int width, int height, float fov_angle)
-            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, ColorRGBA(.1, .1, .1))
+            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, ColorRGBA(0.1, 0.1, 0.1))
     {
     }
 
@@ -31,7 +31,7 @@ public:
         #pragma omp parallel for schedule(dynamic) collapse(2)
         for (int i = 0; i < img.width; ++i) {
             for (int j = 0; j < img.height; ++j) {
-                Point3f camera_raster {
+                Point3f camera_raster { // TODO: convert to object and move to Object.h
                         (2*i/img.widthf - 1) * img.aspect_ratio,
                         (-2*j/img.heightf +  1) * tanf(fov/2.0f),
                         -1
@@ -41,13 +41,15 @@ public:
                 gmtl::normalize(dir);
                 Rayf ray(origin, dir);
                 Matrix44f camera_to_world; // IDENTITY by default
-                camera_to_world[0][3] = 0.5f;
-                camera_to_world[1][3] = 0.25f;
+                camera_to_world[0][3] = 0.0f; // x
+                camera_to_world[1][3] = 0.0f; // y
+                camera_to_world[2][3] = 1.0f; // z
                 ray = camera_to_world * ray;
                 img[i][j] = cast_ray(ray);
             }
             //std::cout << "\r" << ( i / static_cast<float>(img.width) * 100) << "%                         ";
         }
+
         double dt = difftime(time(nullptr), start_time);
         std::cout << "\nElapsed time: " << dt << "s" << std::endl;
         std::cout << "\r" << "100.0%                         ";
@@ -61,28 +63,28 @@ private:
     const Scene& scene;
     Image<ColorRGBA> img;
 
-    Vec3f refract(const Vec3f& incident, const Vec3f& normal, float kRefraction) {
+    Vec3f refract(const Vec3f& incident, const Vec3f& normal, float matRefraction) {
         Vec3f n = normal;
-        Vec3f opp_normal = normal;
-        opp_normal *= -1;
-        float n1 = RefractionCoefficient::empty;
-        float n2 = RefractionCoefficient::glass;
+        float n1 = RefractionCoefficient::empty; //etai
+        float n2 = matRefraction; // etat
 
         float c = gmtl::dot(normal, incident);
-        if (c > 0.0f) {// from filed to empty medium
+        if (c > 0.0f) {// from filled to empty medium
             std::swap(n1, n2);
+            n *= -1;
         }
-        c *= -1;
+        else {
+            c *= -1;
+        }
         float r = n1/n2;
-
-        Vec3f result = Vec3f(r*incident) + Vec3f((r*c - sqrtf(1 - r*r*(1-c*c)))*normal);
-        return result;
+        float k = 1 - r * r * (1 - c*c);
+        return k < 0 ? Vec3f(0, 0, 0) : r*incident + n*(r*c - sqrtf(k));
     }
 
     ColorRGBA cast_ray(const Rayf& ray, int depth = 0) {
         static const int MAX_DEPTH = 7;
         if (depth > MAX_DEPTH) {
-            return ColorRGBA::black; // global illumination
+            return ColorRGBA::black;
         }
 
         float nearDistance = 10e9f;
@@ -108,7 +110,8 @@ private:
                 float lDistance = gmtl::length(lDir);
                 gmtl::normalize(lDir);
                 gmtl::reflect(reflection, ray.getDir(), normal);
-                float lightAttenuation = 1.0f/(lDistance*lDistance);
+                gmtl::normalize(reflection);
+                float lightAttenuation = light.getRadius()/(lDistance*lDistance);
                 ColorRGBA cEmission = mat.kEmission * mat.color;
                 float diffuse = mat.kDiffuse * std::max(gmtl::dot(normal, lDir), 0.25f);
                 ColorRGBA cDif = diffuse * lightAttenuation * mat.color * light.color;
@@ -120,10 +123,13 @@ private:
                 ColorRGBA cFres = fresnel * lightAttenuation * light.color;
                 pixel += cEmission + cDif + cSpec + cFres;
             }
-            Vec3f refraction = refract(ray.getDir(), normal, mat.coeffRefraction);
-            return pixel + .75f
-                   * ( mat.kReflection * cast_ray(Rayf(nearCollision.hitPoint + static_cast<Vec3f>(normal*0.1f), reflection), depth + 1)
-                     + mat.kRefraction * cast_ray(Rayf(nearCollision.hitPoint - static_cast<Vec3f>(normal*0.1f), refraction), depth + 1)
+            Vec3f refraction = refract(ray.getDir(), normal, mat.matRefraction);
+            gmtl::normalize(refraction);
+            Vec3f reflectionOffset = normal * 0.001f * gmtl::dot(reflection, normal);
+            Vec3f refractionOffset = normal * 0.001f * gmtl::dot(refraction, normal);
+            return pixel + 0.85f
+                   * ( mat.kReflection * cast_ray(Rayf(nearCollision.hitPoint + reflectionOffset, reflection), depth + 1)
+                     + mat.kRefraction * cast_ray(Rayf(nearCollision.hitPoint + refractionOffset, refraction), depth + 1)
                      );
         }
 

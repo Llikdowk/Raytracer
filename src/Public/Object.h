@@ -55,21 +55,29 @@ public:
 
 class Light : public Object {
 public:
+    ColorRGBA color = ColorRGBA::white;
+
     Light(float x, float y, float z) : Object(x, y, z) {}
     Light(float x, float y, float z, ColorRGBA c) : Object(x, y, z), color(c) {}
-    Light& setColor(ColorRGBA color) {
+    Light* setColor(ColorRGBA color) {
         this->color = color;
-        return *this;
-    }
-
-    Light& setIntensity(float f) {
-        color.setAlpha(f);
-        return *this;
+        return this;
     }
 
     virtual Collision checkCollision(const Rayf& ray) const override {
         return {false, Vec3f(0,0,0), 0.0f};
     }
 
-    ColorRGBA color = ColorRGBA::white;
+    float getRadius() const {
+        return radius;
+    }
+
+    Light* setRadius(float r) {
+        radius = r;
+        return this;
+    }
+
+
+private:
+    float radius = 1.0f;
 };

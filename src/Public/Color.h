@@ -4,7 +4,7 @@
 #include <cstdint>
 
 template <typename T, T MAX_VALUE>
-class Color {
+class Color { // TODO: get alpha operations right and fix internal color type
 public:
 
     using value_type = T;
@@ -102,4 +102,4 @@ template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>
 template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::white = Color<T, MAX_VALUE>  (1, 1, 1);
 template <typename T, T MAX_VALUE> const Color<T, MAX_VALUE> Color<T, MAX_VALUE>::black = Color<T, MAX_VALUE>  (0, 0, 0);
 
-using ColorRGBA = Color<uint8_t, 0xFF>;
+using ColorRGBA = Color<uint16_t, 0xFF>; // fixme! mismatch between max size available and max size set to fix rare overflow issues

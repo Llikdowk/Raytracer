@@ -4,8 +4,11 @@
 #include "MyMath.h"
 #include "Color.h"
 #include <iomanip>
+#include <ctime>
 
 #include <gmtl/gmtl.h>
+#include <omp.h>
+
 using gmtl::Vec3f;
 using gmtl::Rayf;
 using gmtl::Point3f;
@@ -16,13 +19,16 @@ public:
 
     Raytracer(const Scene& scene, int width, int height, float fov_angle)
             : scene(scene), fov(deg2rad(fov_angle)), img(width, height, ColorRGBA(.1, .1, .1))
-    {}
+    {
+    }
 
     void run() {
         std::cout << "Generating image..." << std::endl;
         std::cout << std::fixed;
         std::cout << std::setprecision(1);
 
+        time_t start_time = time(nullptr);
+        #pragma omp parallel for schedule(dynamic) collapse(2)
         for (int i = 0; i < img.width; ++i) {
             for (int j = 0; j < img.height; ++j) {
                 Point3f camera_raster {
@@ -40,9 +46,10 @@ public:
                 ray = camera_to_world * ray;
                 img[i][j] = cast_ray(ray);
             }
-            std::cout << "\r" << ( i / static_cast<float>(img.width) * 100) << "%                         ";
+            //std::cout << "\r" << ( i / static_cast<float>(img.width) * 100) << "%                         ";
         }
-
+        double dt = difftime(time(nullptr), start_time);
+        std::cout << "\nElapsed time: " << dt << "s" << std::endl;
         std::cout << "\r" << "100.0%                         ";
         std::cout << "\nImage generated!";
 

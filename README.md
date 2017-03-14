@@ -6,6 +6,7 @@ Features:
 * Reflection
 * Refraction
 * Blinn-Phong illumination modified with a fake fresnel
+* Light attenuation
 * Multithreaded (used OpenMP to apply a simple SIMD parallelization)
 
 Output image sample:

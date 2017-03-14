@@ -20,7 +20,7 @@ int main() {
          .addObject(new Sphere(2.5, 0.15, -2.5f, 1.5, ColorRGBA::green))
          .addObject(new Sphere(0.3, 0.2, 0.2f, 0.25f, Material(ColorRGBA::red)))
          .addObject(opaqueSphere)
-         .addLight((new Light(-0.5, -0.5f, 0, ColorRGBA::white))->setRadius(2.0f))
+         .addLight((new Light(-0.5f, -0.5f, 0, ColorRGBA::white))->setRadius(2.0f))
          .addLight((new Light(0.5, 1, 0, ColorRGBA::cyan)))
     ;
 

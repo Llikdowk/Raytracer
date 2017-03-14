@@ -4,7 +4,7 @@
 #include "MyMath.h"
 #include "Color.h"
 #include <iomanip>
-#include <ctime>
+#include <chrono>
 
 #include <gmtl/gmtl.h>
 #include <omp.h>
@@ -13,6 +13,7 @@ using gmtl::Vec3f;
 using gmtl::Rayf;
 using gmtl::Point3f;
 using gmtl::Matrix44f;
+
 
 class Raytracer {
 public:
@@ -27,13 +28,15 @@ public:
         std::cout << std::fixed;
         std::cout << std::setprecision(1);
 
-        time_t start_time = time(nullptr);
-        #pragma omp parallel for schedule(dynamic) collapse(2)
+        auto start = std::chrono::high_resolution_clock::now();
+        float progress = 0.0f;
+        const float step = 1.0f/(img.width);
+        #pragma omp parallel for schedule(dynamic)
         for (int i = 0; i < img.width; ++i) {
             for (int j = 0; j < img.height; ++j) {
-                Point3f camera_raster { // TODO: convert to object and move to Object.h
-                        (2*i/img.widthf - 1) * img.aspect_ratio,
-                        (-2*j/img.heightf +  1) * tanf(fov/2.0f),
+                Point3f camera_raster{ // TODO: convert to object and move to Object.h
+                        (2 * i / img.widthf - 1) * img.aspect_ratio,
+                        (-2 * j / img.heightf + 1) * tanf(fov / 2.0f),
                         -1
                 };
                 Point3f origin(0, 0, 0);
@@ -47,12 +50,16 @@ public:
                 ray = camera_to_world * ray;
                 img[i][j] = cast_ray(ray);
             }
-            //std::cout << "\r" << ( i / static_cast<float>(img.width) * 100) << "%                         ";
+            #pragma omp atomic
+            progress += step;
+            if (omp_get_thread_num() == 0) {
+                std::cout << "\r" << progress * 100.0f << "%                         ";
+            }
         }
 
-        double dt = difftime(time(nullptr), start_time);
-        std::cout << "\nElapsed time: " << dt << "s" << std::endl;
-        std::cout << "\r" << "100.0%                         ";
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> dt = finish - start;
+        std::cout << "\nElapsed time: " << dt.count() << "s" << std::endl;
         std::cout << "\nImage generated!";
 
         img.savePPM("output/out.ppm");

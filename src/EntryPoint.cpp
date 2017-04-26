@@ -14,13 +14,14 @@ int main() {
     opaqueSphere->material = opaqueMat;
 
     Material planeMat;
-    planeMat.kReflection = 0.0f;
+    planeMat.kReflection = 0.20f;
     planeMat.kRefraction = 0.0f;
-    opaqueMat.kSpecular = 1.0f;
-    opaqueMat.specularPower = 1.0f;
-    opaqueMat.kFresnel = 1.0f;
-    opaqueMat.color = ColorRGB::white;
-    Plane* plane = new Plane(0.0f, -0.5f, 0.0f, 0,1,0);
+    planeMat.kSpecular = 0.0f;
+    planeMat.specularPower = 0.0f;
+    planeMat.kFresnel = 0.0f;
+    planeMat.kDiffuse = 0.5f;
+    planeMat.color = ColorRGB::white;
+    Plane* plane = new Plane(0.0f, -1.5f, 0.0f, 0,1,0);
     plane->material = planeMat;
 
 
@@ -32,7 +33,7 @@ int main() {
          .addObject(opaqueSphere)
          .addObject(plane)
          .addLight((new Light(-0.5f, -0.5f, 0, ColorRGB::white))->setRadius(2.0f))
-         .addLight((new Light(0.5, 1, 0, ColorRGB::cyan)))
+         //.addLight((new Light(0.5, 1, 0, ColorRGB::cyan)))
     ;
 
     //Raytracer raytracer(scene, 1366, 768, 90);

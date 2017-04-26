@@ -53,6 +53,32 @@ public:
     }
 };
 
+class Plane : public Object {
+public:
+
+    Plane(float x, float y, float z, float nx, float ny, float nz) : Object(x, y, z), normal(nx, ny, nz) {
+    }
+
+    Collision checkCollision(const Rayf &r) const override {
+        float denominator = gmtl::dot(r.getDir(), normal);
+        if (fabs(denominator) > 0.0001f) {
+            float t = gmtl::dot(centre - r.getOrigin(), normal)/denominator;
+            if (t >= 0.0001f) {
+                Vec3f hitPoint = r.getOrigin() + Vec3f(t*r.getDir());
+                return {true, r.getOrigin() + hitPoint, gmtl::length(Vec3f(hitPoint - r.getOrigin()))};
+            }
+        }
+        return {false, Vec3f(0,0,0), 0};
+    }
+
+    Vec3f getNormal(const Vec3f &point) const override {
+        return normal;
+    }
+
+private:
+    Vec3f normal;
+};
+
 class Light : public Object {
 public:
     ColorRGB color = ColorRGB::white;

@@ -13,6 +13,16 @@ int main() {
     Sphere* opaqueSphere = new Sphere(0.20, -0.4f, 0.25f, 0.12);
     opaqueSphere->material = opaqueMat;
 
+    Material planeMat;
+    planeMat.kReflection = 0.0f;
+    planeMat.kRefraction = 0.0f;
+    opaqueMat.kSpecular = 1.0f;
+    opaqueMat.specularPower = 1.0f;
+    opaqueMat.kFresnel = 1.0f;
+    opaqueMat.color = ColorRGB::white;
+    Plane* plane = new Plane(0.0f, -0.5f, 0.0f, 0,1,0);
+    plane->material = planeMat;
+
 
     scene.addObject(new Sphere(0.0, -0.25f, -1.0f, 1.0f, ColorRGB(0.0,0.25,0.25)))
          .addObject(new Sphere(-1.5f, 0, -2.5f, 1.5f, ColorRGB::magenta))
@@ -20,6 +30,7 @@ int main() {
          .addObject(new Sphere(2.5, 0.15, -2.5f, 1.5, ColorRGB::green))
          .addObject(new Sphere(0.3, 0.2, 0.2f, 0.25f, Material(ColorRGB::red)))
          .addObject(opaqueSphere)
+         .addObject(plane)
          .addLight((new Light(-0.5f, -0.5f, 0, ColorRGB::white))->setRadius(2.0f))
          .addLight((new Light(0.5, 1, 0, ColorRGB::cyan)))
     ;

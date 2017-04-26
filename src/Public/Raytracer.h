@@ -18,8 +18,8 @@ using gmtl::Matrix44f;
 class Raytracer {
 public:
 
-    Raytracer(const Scene& scene, int width, int height, float fov_angle)
-            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, ColorRGB(0.1, 0.1, 0.1))
+    Raytracer(const Scene& scene, int width, int height, float fov_angle, ColorRGB baseColor)
+            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, baseColor)
     {
     }
 
@@ -114,22 +114,37 @@ private:
             Vec3f reflection;
             const Material& mat = nearObj->material;
             for (auto light_it = scene.getLights().begin(); light_it != scene.getLights().end(); ++light_it) {
+
                 const Light &light = *(*light_it);
                 Vec3f lDir = light.centre - nearCollision.hitPoint;
                 float lDistance = gmtl::length(lDir);
+                float shadowing = 1.0f;
+
+                /*
+                Rayf lightRay = Rayf(nearCollision.hitPoint + Vec3f(nearObj->getNormal(nearCollision.hitPoint) * 0.1f), -lDir);
+                for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
+                    const Object& obj = *(*it);
+                    Collision collision = obj.checkCollision(lightRay);
+                    if (collision.hasCollided) {
+                        shadowing = 0.5f;
+                        break;
+                    }
+                }
+                */
+
                 gmtl::normalize(lDir);
-                gmtl::reflect(reflection, ray.getDir(), normal);
+                gmtl::reflect(reflection, lDir, normal);
                 gmtl::normalize(reflection);
-                float lightAttenuation = light.getRadius()/(lDistance*lDistance);
+                float lightAttenuation = light.getRadius()/(lDistance*lDistance) * shadowing;
+
                 ColorRGB cEmission = mat.kEmission * mat.color;
                 float diffuse = mat.kDiffuse * std::max(gmtl::dot(normal, lDir), 0.25f);
                 ColorRGB cDif = diffuse * lightAttenuation * mat.color * light.color;
-                reflection *= -1;
                 float specular = mat.kSpecular * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), mat.specularPower);
                 ColorRGB cSpec = specular * lightAttenuation * light.color;
-                reflection *= -1;
-                float fresnel = mat.kFresnel * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), mat.fresnelPower);
+                float fresnel = mat.kFresnel * powf(std::max(1 - gmtl::dot(-ray.getDir(), normal), 0.0f), mat.fresnelPower);
                 ColorRGB cFres = fresnel * lightAttenuation * light.color;
+
                 pixel += cEmission + cDif + cSpec + cFres;
             }
             Vec3f refraction = refract(ray.getDir(), normal, mat.matRefraction);

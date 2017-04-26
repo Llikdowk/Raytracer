@@ -2,7 +2,10 @@
 #include "Raytracer.h"
 
 int main() {
+
     Scene scene;
+
+    /*
     Material opaqueMat;
     opaqueMat.kRefraction = 0.1f;
     opaqueMat.kReflection = 0.05f;
@@ -14,12 +17,13 @@ int main() {
     opaqueSphere->material = opaqueMat;
 
     Material planeMat;
-    planeMat.kReflection = 0.20f;
+    planeMat.kReflection = 0.1f;
     planeMat.kRefraction = 0.0f;
     planeMat.kSpecular = 0.0f;
     planeMat.specularPower = 0.0f;
     planeMat.kFresnel = 0.0f;
-    planeMat.kDiffuse = 0.5f;
+    planeMat.kDiffuse = 0.6f;
+    planeMat.kEmission = 0.01f;
     planeMat.color = ColorRGB::white;
     Plane* plane = new Plane(0.0f, -1.5f, 0.0f, 0,1,0);
     plane->material = planeMat;
@@ -33,11 +37,37 @@ int main() {
          .addObject(opaqueSphere)
          .addObject(plane)
          .addLight((new Light(-0.5f, -0.5f, 0, ColorRGB::white))->setRadius(2.0f))
-         //.addLight((new Light(0.5, 1, 0, ColorRGB::cyan)))
+         .addLight((new Light(0.5, 1, 0, ColorRGB::cyan)))
     ;
+    */
 
-    //Raytracer raytracer(scene, 1366, 768, 90);
-    Raytracer raytracer(scene, 300, 200, 90);
+
+    Material planeMat;
+    planeMat.kReflection = 0.1f;
+    planeMat.kRefraction = 0.0f;
+    planeMat.kSpecular = 0.0f;
+    planeMat.specularPower = 0.0f;
+    planeMat.kFresnel = 0.0f;
+    planeMat.kDiffuse = 0.9f;
+    planeMat.kEmission = 0.01f;
+    planeMat.color = ColorRGB::white;
+    Plane* plane = new Plane(0.0f, -1.5f, 0.0f, 0,1,0);
+    plane->material = planeMat;
+
+    Material sphereMat;
+    sphereMat.kSpecular = 10.0f;
+    sphereMat.kRefraction = 0.0f;
+    sphereMat.kReflection = 0.0f;
+    Sphere* sphere = new Sphere(0.0f, 0.0f, -1.0f, 1.0f, ColorRGB(0.0, 0.25, 0.25));
+    sphere->material = sphereMat;
+
+    scene.addObject(plane)
+            .addObject(sphere)
+            .addLight(new Light(0.0, 1.0f, 0.0f));
+
+
+    Raytracer raytracer(scene, 1366, 768, 90, ColorRGB(0.1, 0.1, 0.1));
     raytracer.run();
     return 0;
+
 }

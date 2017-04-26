@@ -19,7 +19,7 @@ class Raytracer {
 public:
 
     Raytracer(const Scene& scene, int width, int height, float fov_angle)
-            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, ColorRGBA(0.1, 0.1, 0.1))
+            : scene(scene), fov(deg2rad(fov_angle)), img(width, height, ColorRGB(0.1, 0.1, 0.1))
     {
     }
 
@@ -52,9 +52,11 @@ public:
             }
             #pragma omp atomic
             progress += step;
-            if (omp_get_thread_num() == 0) {
+
+            //if (omp_get_thread_num() == 0) {
                 std::cout << "\r" << progress * 100.0f << "%                         ";
-            }
+            //}
+
         }
 
         auto finish = std::chrono::high_resolution_clock::now();
@@ -68,7 +70,7 @@ public:
 private:
     float fov; // rad
     const Scene& scene;
-    Image<ColorRGBA> img;
+    Image<ColorRGB> img;
 
     Vec3f refract(const Vec3f& incident, const Vec3f& normal, float matRefraction) {
         Vec3f n = normal;
@@ -88,10 +90,10 @@ private:
         return k < 0 ? Vec3f(0, 0, 0) : r*incident + n*(r*c - sqrtf(k));
     }
 
-    ColorRGBA cast_ray(const Rayf& ray, int depth = 0) {
+    ColorRGB cast_ray(const Rayf& ray, int depth = 0) {
         static const int MAX_DEPTH = 7;
         if (depth > MAX_DEPTH) {
-            return ColorRGBA::black;
+            return ColorRGB::black;
         }
 
         float nearDistance = 10e9f;
@@ -107,7 +109,7 @@ private:
             }
         }
         if (nearObj != nullptr) {
-            ColorRGBA pixel = ColorRGBA::black;
+            ColorRGB pixel = ColorRGB::black;
             Vec3f normal = nearObj->getNormal(nearCollision.hitPoint);
             Vec3f reflection;
             const Material& mat = nearObj->material;
@@ -119,15 +121,15 @@ private:
                 gmtl::reflect(reflection, ray.getDir(), normal);
                 gmtl::normalize(reflection);
                 float lightAttenuation = light.getRadius()/(lDistance*lDistance);
-                ColorRGBA cEmission = mat.kEmission * mat.color;
+                ColorRGB cEmission = mat.kEmission * mat.color;
                 float diffuse = mat.kDiffuse * std::max(gmtl::dot(normal, lDir), 0.25f);
-                ColorRGBA cDif = diffuse * lightAttenuation * mat.color * light.color;
+                ColorRGB cDif = diffuse * lightAttenuation * mat.color * light.color;
                 reflection *= -1;
                 float specular = mat.kSpecular * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), mat.specularPower);
-                ColorRGBA cSpec = specular * lightAttenuation * light.color;
+                ColorRGB cSpec = specular * lightAttenuation * light.color;
                 reflection *= -1;
                 float fresnel = mat.kFresnel * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), mat.fresnelPower);
-                ColorRGBA cFres = fresnel * lightAttenuation * light.color;
+                ColorRGB cFres = fresnel * lightAttenuation * light.color;
                 pixel += cEmission + cDif + cSpec + cFres;
             }
             Vec3f refraction = refract(ray.getDir(), normal, mat.matRefraction);
@@ -140,6 +142,6 @@ private:
                      );
         }
 
-        return depth == 0 ? img.getBackgroundColor() : ColorRGBA::black;
+        return depth == 0 ? img.getBackgroundColor() : ColorRGB::black;
     }
 };

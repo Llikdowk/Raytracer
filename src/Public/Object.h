@@ -55,11 +55,11 @@ public:
 
 class Light : public Object {
 public:
-    ColorRGBA color = ColorRGBA::white;
+    ColorRGB color = ColorRGB::white;
 
     Light(float x, float y, float z) : Object(x, y, z) {}
-    Light(float x, float y, float z, ColorRGBA c) : Object(x, y, z), color(c) {}
-    Light* setColor(ColorRGBA color) {
+    Light(float x, float y, float z, ColorRGB c) : Object(x, y, z), color(c) {}
+    Light* setColor(ColorRGB color) {
         this->color = color;
         return this;
     }

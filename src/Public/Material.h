@@ -9,8 +9,8 @@ namespace RefractionCoefficient {
 
 struct Material {
     Material() = default;
-    Material(const ColorRGBA& color) : color(color) {}
-    ColorRGBA color = ColorRGBA::magenta;
+    Material(const ColorRGB& color) : color(color) {}
+    ColorRGB color = ColorRGB::magenta;
     float kEmission = 0.001f;
     float kDiffuse = 0.750f;
     float kSpecular = 1.0f;

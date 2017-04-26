@@ -118,25 +118,23 @@ private:
                 const Light &light = *(*light_it);
                 Vec3f lDir = light.centre - nearCollision.hitPoint;
                 float lDistance = gmtl::length(lDir);
-                float shadowing = 1.0f;
-
-                /*
-                Rayf lightRay = Rayf(nearCollision.hitPoint + Vec3f(nearObj->getNormal(nearCollision.hitPoint) * 0.1f), -lDir);
-                for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
-                    const Object& obj = *(*it);
-                    Collision collision = obj.checkCollision(lightRay);
-                    if (collision.hasCollided) {
-                        shadowing = 0.5f;
-                        break;
-                    }
-                }
-                */
-
                 gmtl::normalize(lDir);
                 gmtl::reflect(reflection, lDir, normal);
                 gmtl::normalize(reflection);
-                float lightAttenuation = light.getRadius()/(lDistance*lDistance) * shadowing;
+                float shadowing = 1.0f;
 
+                Rayf lightRay = Rayf(nearCollision.hitPoint, lDir);
+                for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
+                    const Object &obj = *(*it);
+                    if (&obj == nearObj) continue;
+                    Collision collision = obj.checkCollision(lightRay);
+                    if (collision.hasCollided) {
+                        shadowing = 0.25f;
+                        break;
+                    }
+                }
+
+                float lightAttenuation = light.getRadius()/(lDistance*lDistance) * shadowing;
                 ColorRGB cEmission = mat.kEmission * mat.color;
                 float diffuse = mat.kDiffuse * std::max(gmtl::dot(normal, lDir), 0.25f);
                 ColorRGB cDif = diffuse * lightAttenuation * mat.color * light.color;
@@ -149,11 +147,9 @@ private:
             }
             Vec3f refraction = refract(ray.getDir(), normal, mat.matRefraction);
             gmtl::normalize(refraction);
-            Vec3f reflectionOffset = normal * 0.001f * gmtl::dot(reflection, normal);
-            Vec3f refractionOffset = normal * 0.001f * gmtl::dot(refraction, normal);
             return pixel + 0.85f
-                   * ( mat.kReflection * cast_ray(Rayf(nearCollision.hitPoint + reflectionOffset, reflection), depth + 1)
-                     + mat.kRefraction * cast_ray(Rayf(nearCollision.hitPoint + refractionOffset, refraction), depth + 1)
+                   * ( mat.kReflection * cast_ray(Rayf(nearCollision.hitPoint, reflection), depth + 1)
+                     + mat.kRefraction * cast_ray(Rayf(nearCollision.hitPoint, refraction), depth + 1)
                      );
         }
 

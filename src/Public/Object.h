@@ -63,7 +63,7 @@ public:
         float denominator = gmtl::dot(r.getDir(), normal);
         if (fabs(denominator) > 0.0001f) {
             float t = gmtl::dot(centre - r.getOrigin(), normal)/denominator;
-            if (t >= 0.0001f) {
+            if (t > 0) {
                 Vec3f hitPoint = r.getOrigin() + Vec3f(t*r.getDir());
                 return {true, r.getOrigin() + hitPoint, gmtl::length(Vec3f(hitPoint - r.getOrigin()))};
             }

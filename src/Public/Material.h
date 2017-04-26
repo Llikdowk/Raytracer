@@ -16,9 +16,9 @@ struct Material {
     float kSpecular = 1.0f;
     float specularPower = 250.0f; // glossiness
     float kFresnel = 0.5f;
-    float fresnelPower = 10.0f;
+    float fresnelPower = 6.0f;
     float matRefraction = RefractionCoefficient::glass;
-    float kRefraction = 1.0f;
+    float kRefraction = 0.25f;
     float kReflection = 0.5f;
 };
 

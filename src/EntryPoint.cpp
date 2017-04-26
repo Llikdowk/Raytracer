@@ -4,8 +4,7 @@
 int main() {
 
     Scene scene;
-
-    /*
+/*
     Material opaqueMat;
     opaqueMat.kRefraction = 0.1f;
     opaqueMat.kReflection = 0.05f;
@@ -39,16 +38,17 @@ int main() {
          .addLight((new Light(-0.5f, -0.5f, 0, ColorRGB::white))->setRadius(2.0f))
          .addLight((new Light(0.5, 1, 0, ColorRGB::cyan)))
     ;
-    */
+*/
 
 
     Material planeMat;
-    planeMat.kReflection = 0.1f;
-    planeMat.kRefraction = 0.0f;
-    planeMat.kSpecular = 0.0f;
-    planeMat.specularPower = 0.0f;
+
+    planeMat.kReflection = 1.0f;
+    planeMat.kRefraction = 0.25f;
+    planeMat.kSpecular = 0.5f;
+    planeMat.specularPower = 10.0f;
     planeMat.kFresnel = 0.0f;
-    planeMat.kDiffuse = 0.9f;
+    planeMat.kDiffuse = 0.75f;
     planeMat.kEmission = 0.01f;
     planeMat.color = ColorRGB::white;
     Plane* plane = new Plane(0.0f, -1.5f, 0.0f, 0,1,0);
@@ -56,14 +56,22 @@ int main() {
 
     Material sphereMat;
     sphereMat.kSpecular = 10.0f;
-    sphereMat.kRefraction = 0.0f;
-    sphereMat.kReflection = 0.0f;
-    Sphere* sphere = new Sphere(0.0f, 0.0f, -1.0f, 1.0f, ColorRGB(0.0, 0.25, 0.25));
+    sphereMat.kRefraction = 0.5f;
+    sphereMat.kReflection = 1.0f;
+    sphereMat.color = ColorRGB::red;
+    Sphere* sphere = new Sphere(0.0f, 0.0f, -1.0f, 1.0f);
     sphere->material = sphereMat;
+
+
+    Light* light = new Light(0.0, 2.0, 0.0);
+    light->setRadius(5.0f);
+    Light* light2 = new Light(1, 1, 0);
+    light2->color = ColorRGB::cyan;
 
     scene.addObject(plane)
             .addObject(sphere)
-            .addLight(new Light(0.0, 1.0f, 0.0f));
+            .addLight(light)
+            .addLight(light2);
 
 
     Raytracer raytracer(scene, 1366, 768, 90, ColorRGB(0.1, 0.1, 0.1));

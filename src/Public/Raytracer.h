@@ -46,7 +46,7 @@ public:
                 Rayf ray(origin, dir);
                 Matrix44f camera_to_world; // IDENTITY by default
                 camera_to_world[0][3] = 0.0f; // x
-                camera_to_world[1][3] = 0.0f; // y
+                camera_to_world[1][3] = 0.25f; // y
                 camera_to_world[2][3] = 1.0f; // z
                 ray = camera_to_world * ray;
                 img[i][j] = cast_ray(ray);

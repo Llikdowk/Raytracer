@@ -16,8 +16,8 @@ int main() {
     opaqueSphere->material = opaqueMat;
 
     Material planeMat;
-    planeMat.kReflection = 0.1f;
-    planeMat.kRefraction = 0.0f;
+    planeMat.kReflection = 0.25f;
+    planeMat.kRefraction = 0.75f;
     planeMat.kSpecular = 0.0f;
     planeMat.specularPower = 0.0f;
     planeMat.kFresnel = 0.0f;
@@ -35,7 +35,7 @@ int main() {
          .addObject(new Sphere(0.3, 0.2, 0.2f, 0.25f, Material(ColorRGB::red)))
          .addObject(opaqueSphere)
          .addObject(plane)
-         .addLight((new Light(-0.5f, -0.5f, 0, ColorRGB::white))->setRadius(2.0f))
+         .addLight((new Light(-0.5f, 1.5f, 0, ColorRGB::white))->setRadius(15.0f))
          .addLight((new Light(0.5, 1, 0, ColorRGB::cyan)))
     ;
 */
@@ -43,8 +43,8 @@ int main() {
 
     Material planeMat;
 
-    planeMat.kReflection = 1.0f;
-    planeMat.kRefraction = 0.25f;
+    planeMat.kReflection = 0.0f;
+    planeMat.kRefraction = 0.0f;
     planeMat.kSpecular = 0.5f;
     planeMat.specularPower = 10.0f;
     planeMat.kFresnel = 0.0f;
@@ -55,26 +55,33 @@ int main() {
     plane->material = planeMat;
 
     Material sphereMat;
-    sphereMat.kSpecular = 10.0f;
-    sphereMat.kRefraction = 0.5f;
-    sphereMat.kReflection = 1.0f;
+    sphereMat.kEmission = 0.1f;
+    sphereMat.kDiffuse = 1.0f;
+    sphereMat.kSpecular = 1.0f;
+    sphereMat.specularPower = 10.0f;
+    sphereMat.kRefraction = 0.65f;
+    sphereMat.kReflection = 0.35f;
+    sphereMat.kFresnel = 0.5f;
     sphereMat.color = ColorRGB::red;
-    Sphere* sphere = new Sphere(0.0f, 0.0f, -1.0f, 1.0f);
+    Sphere* sphere = new Sphere(-0.25f, 0.0f, -1.0f, 1.0f);
     sphere->material = sphereMat;
 
 
     Light* light = new Light(0.0, 2.0, 0.0);
-    light->setRadius(5.0f);
+    light->setRadius(35.0f);
     Light* light2 = new Light(1, 1, 0);
     light2->color = ColorRGB::cyan;
 
     scene.addObject(plane)
             .addObject(sphere)
-            .addLight(light)
-            .addLight(light2);
+            .addObject(new Sphere(1.25, 0, -1.5f, 0.75f, ColorRGB::cyan))
+            .addObject(new Sphere(-2.0f, 0.5, -2.75f, 1.5f, ColorRGB::green))
+            //.addLight(light2)
+            .addLight(light);
 
 
-    Raytracer raytracer(scene, 1366, 768, 90, ColorRGB(0.1, 0.1, 0.1));
+    Raytracer raytracer(scene, 1366, 768, 90, ColorRGB::black);//ColorRGB(0.0, 0.0, 0.0));
+    //Raytracer raytracer(scene, 640, 360, 90, ColorRGB(0.0, 0.0, 0.0));
     raytracer.run();
     return 0;
 

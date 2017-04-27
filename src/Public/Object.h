@@ -23,8 +23,8 @@ public:
 
 protected:
     Object(float x, float y, float z) : centre(x, y, z) {}
+    const float epsilon = 1E-2f;
 };
-
 
 class Sphere : public Object {
 public:
@@ -37,8 +37,8 @@ public:
         QuadraticSolution result = quadratic_solver(1, 2 * dot(p, ray.getDir()), dot(p, p) - r * r);
         if (result.numSolutionsFound > 0) {
             float r = result.x1 > 0 ? result.x1 : result.x2;
-            if (r > 0) {
-                Vec3f hitPoint = ray.getOrigin() + static_cast<Vec3f>(r * ray.getDir());
+            if (r > epsilon) {
+                Vec3f hitPoint = ray.getOrigin() + Vec3f(r * ray.getDir());
                 return {true, hitPoint, r};
             }
         }
@@ -61,9 +61,9 @@ public:
 
     Collision checkCollision(const Rayf &r) const override {
         float denominator = gmtl::dot(r.getDir(), normal);
-        if (fabs(denominator) > 0.0001f) {
+        if (fabs(denominator) > epsilon) {
             float t = gmtl::dot(centre - r.getOrigin(), normal)/denominator;
-            if (t > 0) {
+            if (t > epsilon) {
                 Vec3f hitPoint = r.getOrigin() + Vec3f(t*r.getDir());
                 return {true, r.getOrigin() + hitPoint, gmtl::length(Vec3f(hitPoint - r.getOrigin()))};
             }

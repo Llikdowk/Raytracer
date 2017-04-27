@@ -11,14 +11,14 @@ struct Material {
     Material() = default;
     Material(const ColorRGB& color) : color(color) {}
     ColorRGB color = ColorRGB::magenta;
-    float kEmission = 0.001f;
-    float kDiffuse = 0.750f;
+    float kEmission = 0.01f;
+    float kDiffuse = 1.0f;
     float kSpecular = 1.0f;
-    float specularPower = 250.0f; // glossiness
+    float specularPower = 150.0f; // glossiness
     float kFresnel = 0.5f;
     float fresnelPower = 6.0f;
     float matRefraction = RefractionCoefficient::glass;
-    float kRefraction = 0.25f;
-    float kReflection = 0.5f;
+    float kRefraction = 1.0f;
+    float kReflection = 0.25f;
 };
 

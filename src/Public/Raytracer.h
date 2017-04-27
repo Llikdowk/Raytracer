@@ -8,6 +8,7 @@
 
 #include <gmtl/gmtl.h>
 #include <omp.h>
+#include <algorithm>
 
 using gmtl::Vec3f;
 using gmtl::Rayf;
@@ -90,10 +91,11 @@ private:
         return k < 0 ? Vec3f(0, 0, 0) : r*incident + n*(r*c - sqrtf(k));
     }
 
-    ColorRGB cast_ray(const Rayf& ray, int depth = 0) {
-        static const int MAX_DEPTH = 7;
+    ColorRGB cast_ray(const Rayf& ray, const Object* const lastObject = nullptr, int depth = 0) {
+        static const float bias = 1E-5f;
+        static const int MAX_DEPTH = 2;
         if (depth > MAX_DEPTH) {
-            return ColorRGB::black;
+            return ColorRGB::white;//ColorRGB::black;
         }
 
         float nearDistance = 10e9f;
@@ -101,6 +103,7 @@ private:
         Collision nearCollision;
         for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
             const Object& obj = *(*it);
+            if (lastObject == &obj) continue;
             Collision collision = obj.checkCollision(ray);
             if (collision.hasCollided && collision.distance < nearDistance) {
                 nearDistance = collision.distance;
@@ -111,17 +114,20 @@ private:
         if (nearObj != nullptr) {
             ColorRGB pixel = ColorRGB::black;
             Vec3f normal = nearObj->getNormal(nearCollision.hitPoint);
-            Vec3f reflection;
             const Material& mat = nearObj->material;
-            for (auto light_it = scene.getLights().begin(); light_it != scene.getLights().end(); ++light_it) {
 
+            ColorRGB reflectionColor = ColorRGB::black;
+            ColorRGB cEmission = mat.kEmission * mat.color;
+            ColorRGB cDiffuse = ColorRGB::black;
+            ColorRGB cSpecular = ColorRGB::black;
+            ColorRGB cFresnel = ColorRGB::black;
+            for (auto light_it = scene.getLights().begin(); light_it != scene.getLights().end(); ++light_it) {
                 const Light &light = *(*light_it);
                 Vec3f lDir = light.centre - nearCollision.hitPoint;
                 float lDistance = gmtl::length(lDir);
                 gmtl::normalize(lDir);
-                gmtl::reflect(reflection, lDir, normal);
-                gmtl::normalize(reflection);
                 float shadowing = 1.0f;
+
 
                 Rayf lightRay = Rayf(nearCollision.hitPoint, lDir);
                 for (auto it = scene.getObjects().begin(); it != scene.getObjects().end(); ++it) {
@@ -129,30 +135,46 @@ private:
                     if (&obj == nearObj) continue;
                     Collision collision = obj.checkCollision(lightRay);
                     if (collision.hasCollided) {
-                        shadowing = 0.25f;
-                        break;
+                        shadowing *= 0.25f;
+                        //break;
                     }
                 }
 
-                float lightAttenuation = light.getRadius()/(lDistance*lDistance) * shadowing;
-                ColorRGB cEmission = mat.kEmission * mat.color;
+                float lightAttenuation = light.getRadius() / (lDistance * lDistance) * shadowing;
                 float diffuse = mat.kDiffuse * std::max(gmtl::dot(normal, lDir), 0.25f);
-                ColorRGB cDif = diffuse * lightAttenuation * mat.color * light.color;
-                float specular = mat.kSpecular * powf(std::max(gmtl::dot(ray.getDir(), reflection), 0.0f), mat.specularPower);
-                ColorRGB cSpec = specular * lightAttenuation * light.color;
+                cDiffuse += diffuse * lightAttenuation * mat.color * light.color;
+                Vec3f reflection;
+                gmtl::reflect(reflection, Vec3f(-lDir), normal);
+                float specular = mat.kSpecular * powf(std::max(gmtl::dot(-ray.getDir(), reflection), 0.0f), mat.specularPower);
+                cSpecular += specular * lightAttenuation * light.color;
                 float fresnel = mat.kFresnel * powf(std::max(1 - gmtl::dot(-ray.getDir(), normal), 0.0f), mat.fresnelPower);
-                ColorRGB cFres = fresnel * lightAttenuation * light.color;
+                cFresnel += fresnel * lightAttenuation * light.color;
 
-                pixel += cEmission + cDif + cSpec + cFres;
+                if (mat.kReflection > 0) {
+                    //pixel += cEmission + cDif;// + cSpec + cFres;
+                    reflectionColor += mat.kReflection *
+                                       cast_ray(Rayf(nearCollision.hitPoint + Vec3f(normal * bias), reflection),
+                                                nullptr, depth + 1);
+                }
             }
-            Vec3f refraction = refract(ray.getDir(), normal, mat.matRefraction);
-            gmtl::normalize(refraction);
-            return pixel + 0.85f
-                   * ( mat.kReflection * cast_ray(Rayf(nearCollision.hitPoint, reflection), depth + 1)
-                     + mat.kRefraction * cast_ray(Rayf(nearCollision.hitPoint, refraction), depth + 1)
-                     );
+            ColorRGB refractionColor = ColorRGB::black;
+            if (mat.kRefraction > 0) {
+                Vec3f refraction = refract(ray.getDir(), normal, mat.matRefraction);
+                gmtl::normalize(refraction);
+                float refractionSign = gmtl::dot(refraction, normal) >= 0 ? 1.0f : -1.0f;
+                Vec3f refractionOffset = normal * 0.001f * refractionSign;
+                refractionColor += mat.kRefraction * cast_ray(Rayf(nearCollision.hitPoint + Vec3f(refractionSign*normal*bias), refraction), nullptr, depth + 1);
+            }
+
+            if (mat.kRefraction == 0 && mat.kReflection == 0) {
+                pixel = cEmission + cDiffuse;
+            } else {
+                pixel = cEmission + (cFresnel + cSpecular) * reflectionColor + cDiffuse * refractionColor;
+            }
+
+            return pixel;
         }
 
-        return depth == 0 ? img.getBackgroundColor() : ColorRGB::black;
+        return depth == 0 ? img.getBackgroundColor() : ColorRGB::white;//ColorRGB::black;
     }
 };
